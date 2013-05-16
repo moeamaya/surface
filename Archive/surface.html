@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - loaders - OBJ loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+	    <link rel="stylesheet" href="css/normalize.min.css">
+	    <link rel="stylesheet" href="css/main_old.css">
+
+	</head>
+
+	<body>
+	    <div id="blackBlock"></div>
+	
+	    <div id="main">
+		<header>
+			Surface
+			<a href="#" class="button" id="login">Login</a>
+			<a href="#" class="button" id="save">Save</a>
+			
+		</header>
+		
+		<div id="menu">
+		    <div id="handle"></div>
+		    <div class="title">TESSELLATION</div>
+			<div class="subtitle">Type</div>
+			<ul>
+			    <li><a href="#" onclick="setTesselation( 'tri' )"><img src="img/tri.png">
+				<span>TRI</span></a></li>
+			    <li><a href="#" onclick="setTesselation( 'tri' );"><img src="img/quad.png">
+				<span>QUAD</span></a></li>
+			    <li><a href="#" onclick="setTesselation( 'tri' );"><img src="img/hex.png">
+				<span>HEX</span></a></li>
+			</ul>
+			
+			<div class="subtitle">Subdivision</div>
+			<div id="formWrap">
+			    <form>
+				<div class="uv">
+				    <label class="uvChoice">U</label>
+				    <input type="range" min="0" max="4" name="u" value="1" onchange="uvChange( this.value );" >
+				</div>
+				<div class="uv">
+				    <label class="uvChoice">V</label>
+				    <input type="range" min="0" max="4" name="v" id="vv" value="1" readonly="readonly">
+				</div>
+			    </form>
+			</div>
+			
+		    <div class="title">CONNECTION</div>
+			<div class="subtitle">Type</div>
+			<div id="listWrapper">
+			    <ul>
+				<li><a href="#"><img src="img/standing.png">
+				    <span>STANDING SEAM</span></a></li>
+				<li><a href="#"><img src="img/inverted.png">
+				    <span>INVERTED</span></a></li>
+				<li><a href="#"><img src="img/flat.png">
+				    <span>SUPER FLAT</span></a></li>
+			    </ul>
+			</div>
+		    <div class="title">CONSTRUCTION</div>
+		    <div id="cost">
+			<div class="conSub">Cost</div>
+			<div class="conVal">$10,000</div>
+		    </div>
+		    <div id="time">
+			<div class="conSub">Time</div>
+			<div class="conVal">2 Weeks</div>
+		    </div>
+		</div>
+	    </div>
+
+		<script src="js/three.min.js"></script>
+		<script src="js/OBJLoader.js"></script>
+
+		<script>
+			var container, stats;
+
+			var scene, camera, controls, renderer;
+			
+			var geometry;
+
+			var width = window.innerWidth;
+			var height = window.innerHeight;
+
+			var subdiv = 1;
+
+			init();
+			animate();
+
+
+			function init() {
+				container = document.createElement( 'div' );
+				container.style.position = "absolute";
+				container.style.backgroundColor = "#ccc";
+				container.style.top = "0";
+				container.style.zIndex = "-1";
+				document.body.appendChild( container );
+
+				// scene
+
+				scene = new THREE.Scene();
+				
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				
+				//lights
+				
+				var ambient = new THREE.AmbientLight( 0x222222 );
+				scene.add( ambient );
+
+				var directionalLight = new THREE.DirectionalLight( 0xffffff );
+				directionalLight.position.set( 0, .5, 1 ).normalize();
+				scene.add( directionalLight );
+
+				//camera
+				
+				camera = new THREE.PerspectiveCamera( 35, width / height, 1, 20000 );
+				camera.position.x = 100;
+				camera.position.y = 80;
+				camera.position.z = -100;
+				
+				//trackball
+
+				controls = new THREE.TrackballControls( camera, renderer.domElement );
+
+				controls.rotateSpeed = 0.1;
+				controls.zoomSpeed = 1.8;
+				controls.panSpeed = 0.4;
+
+				controls.noZoom = false;
+				controls.noPan = false;
+
+				controls.staticMoving = false;
+				controls.dynamicDampingFactor = 1.0;
+
+				controls.minDistance = 100
+				controls.maxDistance = 5000
+
+				controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
+				
+				// texture
+				
+				var texture = new THREE.MeshPhongMaterial( { color: 0x333333, shininess: 10, reflectivity: 0.1, wireframe: true,} );
+
+				// model
+
+				var loader = new THREE.JSONLoader(),
+					callbackSurface   = function( geometry ) { createScene( geometry,  0, 0, 0 ) };
+
+				loader.load( "js/surface.js", callbackSurface );
+				
+				
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			
+			function createScene( geometry, x, y, z ) {
+				
+				var smooth = THREE.GeometryUtils.clone( geometry );
+				
+				smooth.mergeVertices();
+				
+				var modifier = new THREE.SubdivisionModifier( subdiv );
+
+				modifier.modify( smooth );
+				
+				var mesh = new THREE.Mesh( smooth, new THREE.MeshBasicMaterial( { color: 0x222222, wireframe: true} ) );
+				mesh.position.set( x, y, z );
+				mesh.scale.set( 1, 1, 1 );
+				
+				scene.add( mesh );
+				
+			}
+			
+			function setTesselation( val ){
+				alert( val );
+			}
+			
+			function uvChange( val ){
+				for (var i = 0; i < scene.__objects.length; i++) {
+					if(scene.__objects[i] instanceof THREE.Mesh) {
+					    scene.remove(scene.__objects[i]);
+					}
+				}
+				
+				var vv = document.getElementById('vv');
+				vv.value = val;
+				
+				if (val>4){
+					val = 4;	    
+				}
+				
+				subdiv = val;
+				
+				//alert( subdiv );
+				
+				var loader = new THREE.JSONLoader(),
+					callbackSurface  = function( geometry ) { createScene( geometry,  0, 0, 0 ) };
+
+				loader.load( "js/surface.js", callbackSurface );
+				
+			}
+			
+			
+			function onWindowResize() {
+
+				width = window.innerWidth;
+				height = window.innerHeight;
+
+				renderer.setSize( width, height );
+
+				camera.aspect = width / height;
+				camera.updateProjectionMatrix();
+
+				controls.handleResize();
+
+			}
+
+
+
+			function animate() {
+				
+				requestAnimationFrame( animate );
+				render();
+
+			}
+
+			
+			function render() {
+
+				controls.update();
+				
+				camera.lookAt( scene.position );
+				
+				renderer.clear();
+				renderer.render( scene, camera );
+				
+				
+			}
+
+		</script>
+
+	</body>
+</html>

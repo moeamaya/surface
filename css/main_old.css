@@ -1,0 +1,421 @@
+/* ==========================================================================
+   HTML5 Boilerplate styles - h5bp.com (generated via initializr.com)
+   ========================================================================== */
+
+html,
+button,
+input,
+select,
+textarea {
+    color: #222;
+}
+
+body {
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+::-moz-selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+::selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+img {
+    vertical-align: middle;
+}
+
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.chromeframe {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+body {
+    color: #282828;
+}
+
+#blackBlock {
+    width: 100%;
+    height: 50px;
+    background: #282828;
+    z-index: -1;
+}
+
+#main {
+    margin-left: 3%;
+    margin-right: 3%;
+    width: 94%;
+}
+
+header {
+    margin-top: -30px;
+    background: #EFEFEF;
+    padding: 10px 20px;
+    height: 40px;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.button {
+    background: white;
+    height: 16px;
+    width: 48px;
+    padding: 8px 12px;
+    float: right;
+    margin: 4px 4px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #eeeeee;
+    text-align: center;
+    line-height: 16px;
+    letter-spacing: 1px;
+    font-weight: 100;
+    text-decoration: none;
+}
+.button:hover{
+    color: #fff;
+}
+
+#save {
+    background: #636363;
+}
+
+#login {
+    background: #C6C6C6;
+}
+
+#menu {
+	position: fixed;
+    width: 300px;
+    height: 560px;
+    background: #282828;
+    margin-top: 15px;
+    color: #EFEFEF;
+    z-index: 2;
+}
+
+#handle {
+    height: 18px;
+    width: 100%;
+    background: #666;
+}
+
+.title {
+    display: block;
+    position: relative;
+    padding: 8px 20px;
+    border-top: 1px solid #BFBFBF;
+    border-bottom: 1px solid #BFBFBF;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    display: block;
+    padding: 10px 20px 6px 20px;
+    font-size: 14px;
+}
+#listWrapper{
+    display: block;
+    height: 110px;
+}
+ul{
+    display: block;
+    float: left;
+    margin: 0 20px 30px 20px;
+    padding: 0;
+}
+ul li {
+    float: left;
+    display: block;
+    width: 80px;
+    height: 74px;
+    margin-right: 6px;
+    padding: 0;
+    list-style: none;
+    color: #636363;
+}
+ul li:last-child {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+ul li a {	
+    display: block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #636363;
+    text-decoration: none;
+}
+ul li a img {
+    display: block;
+    width: 80px;
+    height: 75px;
+    font-size: 13px;
+    font-weight: normal;
+    text-align: center;
+    opacity: 0.8;
+    border: 1px solid transparent;
+}
+ul li a img:hover {
+    display: block;
+    width: 80px;
+    height: 75px;
+    border: 1px solid #ccc;
+    opacity: 1.0;
+    border-radius: 6px;
+}
+ul li a span {
+    display: block;
+    margin-top: 3px;
+    font-size: 9px;
+    font-weight: normal;
+    text-align: center;
+}
+#tesselation ul li a span{
+    color: red;
+    background: red;
+}
+
+.uv{
+    display: block;
+    float: left;
+    margin: 0 0px 0 20px;
+    width: 100px;
+    height: 24px;
+    padding: 6px 10px;
+    background: #EFEFEF;
+    border-radius: 6px;
+}
+#formWrap{
+    display:block;
+    width: 100%;
+    height: 56px;
+}
+.uvChoice {
+    float: left;
+    line-height: 24px;
+    font-size: 12px;
+    color: #636363;
+    padding: 0px 8px 0 4px;
+    border-right: 1px dotted #ccc;
+}
+
+.uv input{
+    display: block;
+    float: left;
+    height: 18px;
+    width: 28px;
+    margin: 0 8px;
+    padding: 2px;
+    font-size: 18px;
+    text-align: right;
+    -webkit-appearance: none;
+    border-style: none;
+    background: #EFEFEF;
+}
+.uv input:focus{
+    outline: 1px solid #ccc;
+}
+#cost{
+    border-right: 1px solid #ccc;
+    width: 109px;
+    float: left;
+    padding: 16px 20px;
+    height: 60px;
+}
+#time{
+    width: 109px;
+    float: left;
+    padding: 16px 0 0 20px;
+    height: 60px;
+}
+.conSub{
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+.conVal{
+    color: #7C7C7C;
+    font-size: 24px;
+}
+
+
+/* ==========================================================================
+   Media Queries
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+       only screen and (min-resolution: 144dpi) {
+
+}
+
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+.ir {
+    background-color: transparent;
+    border: 0;
+    overflow: hidden;
+    *text-indent: -9999px;
+}
+
+.ir:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 100%;
+}
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+.clearfix {
+    *zoom: 1;
+}
+
+/* ==========================================================================
+   Print styles
+   ========================================================================== */
+
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important; /* Black prints faster: h5bp.com/s */
+        box-shadow:none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+
+    /*
+     * Don't show links for images, or javascript/internal links
+     */
+
+    .ir a:after,
+    a[href^="javascript:"]:after,
+    a[href^="#"]:after {
+        content: "";
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group; /* h5bp.com/t */
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    @page {
+        margin: 0.5cm;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}

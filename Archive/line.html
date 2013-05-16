@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - custom attributes</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #fff;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				font-weight: bold;
+
+				background-color: #ccc;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index:100;
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<div id="info"><a href="http://github.com/mrdoob/three.js" target="_blank">three.js</a> - custom tesselation</div>
+		<div id="container"></div>
+
+		<script src="js/three.min.js"></script>
+
+
+		<script>
+
+		//var renderer = new THREE.WebGLRenderer();
+		//renderer.setSize(window.innerWidth, window.innerHeight);
+		//
+		//document.body.appendChild(renderer.domElement);
+		//
+		//camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+		//camera.position.set(0, 0, 100);
+		//camera.lookAt(new THREE.Vector3(0, 0, 0));
+		//
+		//scene = new THREE.Scene();
+		//
+		//var material = new THREE.LineBasicMaterial({
+		//       color: 0x0000ff,
+		//});
+		//
+		//var geometry = new THREE.Geometry();
+		//geometry.vertices.push(new THREE.Vector3(-10, 0, 0));
+		//geometry.vertices.push(new THREE.Vector3(0, 10, 0));
+		//geometry.vertices.push(new THREE.Vector3(10, 0, 0));
+		//
+		//var line = new THREE.Line(geometry, material);
+		//
+		//scene.add(line);
+		//renderer.render(scene, camera)
+			       
+		var container, stats;
+
+		var scene, camera, controls, renderer;
+		
+		var geometry;
+
+		var width = window.innerWidth;
+		var height = window.innerHeight;
+
+		var subdiv = 1;
+
+		init();
+		animate();
+
+
+		function init() {
+			container = document.createElement( 'div' );
+			container.style.position = "absolute";
+			container.style.backgroundColor = "#ccc";
+			container.style.top = "0";
+			container.style.zIndex = "-1";
+			document.body.appendChild( container );
+
+			// scene
+
+			scene = new THREE.Scene();
+			
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			container.appendChild( renderer.domElement );
+			
+			//lights
+			
+			var ambient = new THREE.AmbientLight( 0x222222 );
+			scene.add( ambient );
+
+			var directionalLight = new THREE.DirectionalLight( 0x999999 );
+			//directionalLight.position.set( 0, .5, 1 ).normalize();
+			scene.add( directionalLight );
+			
+			var pointLight = new THREE.PointLight( 0xffffff );
+			pointLight.position.x = 100;
+			pointLight.position.y = 50;
+			pointLight.position.z = 100;
+			
+			scene.add( pointLight );
+
+			//camera
+			
+			camera = new THREE.PerspectiveCamera( 35, width / height, 1, 20000 );
+			camera.position.x = -100;
+			camera.position.y = 100;
+			camera.position.z = 100;
+			
+			//trackball
+
+			controls = new THREE.TrackballControls( camera, renderer.domElement );
+
+			controls.rotateSpeed = 0.1;
+			controls.zoomSpeed = 1.8;
+			controls.panSpeed = 0.4;
+
+			controls.noZoom = false;
+			controls.noPan = true;
+
+			controls.staticMoving = false;
+			controls.dynamicDampingFactor = 1.0;
+
+			controls.minDistance = 100
+			controls.maxDistance = 5000
+
+			controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
+
+			// coordinates
+			function v(x,y,z){ 
+				return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
+			};
+			
+			var lineGeo = new THREE.Geometry();
+			lineGeo.vertices.push(
+			  v(-500, 0, 0), v(500, 0, 0), v(50,0,0), v(45,5,0), v(50,0,0), v(45,-5,0),
+			  v(0, -500, 0), v(0, 500, 0), v(0,50,0), v(5,45,0), v(0,50,0), v(-5,45,0),
+			  v(0, 0, -500), v(0, 0, 500), v(0,0,50), v(5,0,45), v(0,0,50), v(-5,0,45)
+			);
+			
+			var lineMat = new THREE.LineBasicMaterial({
+			  color: 0x999999, lineWidth: 1});
+			
+			var line = new THREE.Line(lineGeo, lineMat);
+			line.type = THREE.Lines;
+			scene.add(line);
+			
+			// texture
+			
+			var texture = new THREE.MeshPhongMaterial( { color: 0x333333, shininess: 10, reflectivity: 0.3} );
+
+			// model
+
+			var loader = new THREE.JSONLoader(),
+				callbackSurface   = function( geometry ) { createScene( geometry,  0, 0, 0 ) };
+
+			loader.load( "js/surface.js", callbackSurface );
+			
+			
+			window.addEventListener( 'resize', onWindowResize, false );
+
+		}
+
+		function createScene( geometry, x, y, z ){
+			var mesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0xcccccc, shininess: 10, opacity: 0.2, side: THREE.DoubleSide,} ) );
+			mesh.position.set( x ,y ,z );
+			mesh.scale.set( 1, 1, 1 );
+			
+			scene.add( mesh );
+			
+			var vert = mesh.geometry.vertices
+			
+			for ( i=0; i < vert.length; i+=2 ){
+				if ( i%9 == 8 ){
+					continue;
+				}
+				else{
+					var pt1 = vert[i];
+					var pt2 = vert[i+1];
+					var pt3 = vert[i+2];
+					var pt4 = vert[i+9];
+					var pt5 = vert[i+10];
+					var pt6 = vert[i+11];
+					
+					if (pt4 != undefined && i%9 != 7 ){
+						var lineGeo = new THREE.Geometry();
+						lineGeo.vertices.push(pt1, pt4, pt4, pt5, pt5, pt2);
+						
+						var lineMat = new THREE.LineBasicMaterial({
+							color: 0x222222, linewidth: 3});
+							  
+						var line = new THREE.Line(lineGeo, lineMat);
+						line.type = THREE.Lines;
+						scene.add(line);
+					}
+					if ( i%9 == 7 ){
+						var lineGeo = new THREE.Geometry();
+						lineGeo.vertices.push(pt1, pt2);
+						
+						var lineMat = new THREE.LineBasicMaterial({
+							color: 0x222222, linewidth: 3});
+							  
+						var line = new THREE.Line(lineGeo, lineMat);
+						line.type = THREE.Lines;
+						scene.add(line);
+					}
+				}	      
+			}
+		}
+		
+		function createSceneSub( geometry, x, y, z ) {
+			
+			var smooth = THREE.GeometryUtils.clone( geometry );
+			
+			smooth.mergeVertices();
+			
+			var modifier = new THREE.SubdivisionModifier( subdiv );
+
+			modifier.modify( smooth );
+			
+			var mesh = new THREE.Mesh( smooth, new THREE.MeshPhongMaterial( { color: 0xeeeeee, shininess: 10} ) );
+			mesh.position.set( x, y, z );
+			mesh.scale.set( 3, 3, 3 );
+			
+			scene.add( mesh );
+		}
+		
+		
+		function onWindowResize() {
+
+			width = window.innerWidth;
+			height = window.innerHeight;
+
+			renderer.setSize( width, height );
+
+			camera.aspect = width / height;
+			camera.updateProjectionMatrix();
+
+			controls.handleResize();
+
+		}
+
+
+
+		function animate() {
+			
+			requestAnimationFrame( animate );
+			render();
+
+		}
+
+		
+		function render() {
+
+			controls.update();
+			
+			camera.lookAt( scene.position );
+			
+			renderer.clear();
+			renderer.render( scene, camera );
+			
+			
+		}
+
+		</script>
+
+</body>
+
+</html>

@@ -1,0 +1,347 @@
+/* ==========================================================================
+   HTML5 Boilerplate styles - h5bp.com (generated via initializr.com)
+   ========================================================================== */
+
+html,
+button,
+input,
+select,
+textarea {
+    color: #222;
+}
+
+body {
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+::-moz-selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+::selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+img {
+    vertical-align: middle;
+}
+
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.chromeframe {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+body {
+    color: #f2f2f2;
+	font-family: sans-serif;
+	font-size:14px;
+	font-weight: bold;
+	letter-spacing: 1px;
+	text-align:center;
+	margin: 0px;
+	overflow: hidden;
+	height: 100%;
+}
+
+
+#menu {
+	display: block;
+	position: absolute;
+	background: #BFBFBF;
+	width: 220px;
+	height: 100%;
+	padding-top: 15px;
+	padding-bottom: 80px;
+	overflow: hidden;
+}
+
+.menumargin {
+	position: relative;
+	left: 15px;
+	width: 190px;
+	min-height: 100%;
+}
+
+.dotted {
+	display: block;
+	position: relative;
+	border-top: 1px dotted #333;
+	height: 2px;
+}
+
+#logo {
+	padding: 20px 0;
+	color: #fff;
+	letter-spacing: 1px;
+}
+
+#logo span{
+	display: block;
+	font-size: 9px;
+	color: #666;
+}
+
+#upload{
+	display: block;
+	position: relative;
+	margin: 10px 0 16px;
+	padding: 10px 0;
+	background: #666;
+	font-size: 10px;
+	color: #E8E8E8;
+	text-decoration: none;
+}
+#upload:hover{
+	background: #555;
+}
+#upload span {
+	color: #161616;
+	font-size: 8px;
+}
+
+.title{
+	display: block;
+	position: relative;
+	margin-top: 14px;
+	margin-left: 5px;
+	float: left;
+	color: #fff;
+	font-size: 10px;
+	text-align: left;
+}
+
+
+#options{
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 240px;
+}
+ul{
+    display: block;
+	position: relative;
+	width: 220px;
+    float: left;
+	clear: right;
+    margin: 16px 0 20px 0;
+    padding: 0;
+}
+ul li {
+    float: left;
+    display: block;
+	position: relative;
+    width: 60px;
+    height: 60px;
+    margin-right: 5px;
+    padding: 0;
+    list-style: none;
+    color: #636363;
+}
+ul li:last-child {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+ul li a {	
+    display: block;
+	position: relative;
+    float: left;
+    margin: 0;
+    padding: 0;
+    color: #636363;
+    text-decoration: none;
+}
+ul li a img {
+    display: block;
+	position: relative;
+    width: 50px;
+    height: 50px;
+	padding: 4px;
+    font-size: 13px;
+    font-weight: normal;
+    text-align: center;
+    opacity: 0.9;
+    border: 1px solid transparent;
+}
+ul li a img:hover {
+    display: block;
+    width: 50px;
+    height: 50px;
+	padding: 4px;
+    border: 1px solid #666;
+    opacity: 1.0;
+    border-radius: 6px;
+}
+ul li a span {
+    display: block;
+	position: relative;
+    margin-top: 3px;
+    font-size: 8px;
+    font-weight: bold;
+    text-align: center;
+}
+.active{
+	display: block;
+    width: 50px;
+    height: 50px;
+	padding: 4px;
+    border: 1px solid #666;
+    opacity: 1.0;
+    border-radius: 6px;
+}
+
+
+/* slider root element */
+.slider {
+    height:12px;
+    position:relative;
+    cursor:pointer;
+    border:1px solid #636363;
+    width:176px;
+    float:left;
+    clear:right;
+    margin-top:20px;
+	margin-left: 5px;
+	border-radius: 5px;
+}
+
+/* drag handle */
+.handle {
+    background:#fff;
+    height:26px;
+    width:8px;
+    top:-8px;
+    position:absolute;
+    display:block;
+    margin-top:0px;
+    cursor:pointer;
+}
+
+/* the input field */
+.range {
+	display: none;
+    border:1px inset #ddd;
+    float:left;
+    font-size:20px;
+    margin:0 0 0 15px;
+    padding:3px 0;
+    text-align:center;
+    width:50px;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+}
+
+#footer{
+	display: block;
+	position: relative;
+	height: 80px;
+	margin-left: 15px;
+	width: 190px;
+	margin-top: -80px;
+}
+
+
+	
+/* ==========================================================================
+   Media Queries
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+       only screen and (min-resolution: 144dpi) {
+
+}
+
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+.ir {
+    background-color: transparent;
+    border: 0;
+    overflow: hidden;
+    *text-indent: -9999px;
+}
+
+.ir:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 100%;
+}
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+.clearfix {
+    *zoom: 1;
+}

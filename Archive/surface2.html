@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>surface2</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	
+		<!-- javascript libraries-->
+		<script src="http://cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js"></script>
+		<script src="js/three.min.js"></script>
+		
+		<!-- stylesheets -->
+		<link rel="stylesheet" type="text/css" href="css/main.css"/>
+		
+	</head>
+
+	<body>
+		<div id="menu">
+		
+			<div class="menumargin">
+			
+				<!-- logo -->
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div id="logo">
+					<img src="img/logo.png">
+				</div>
+				<div class="dotted"></div>
+			
+				<!-- upload -->
+				<a id="upload" href="#">
+					UPLOAD
+					<span>(OBJ)</span>
+				</a>
+				
+				<!-- tesselation -->
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				
+				<div class="title">
+					TESSELATION
+				</div>
+				
+				<div id="options">
+					<ul>
+						<li><a href="#" onclick="setTesselation( 'tri' )"><img src="img/tri.png">
+						<span>TRI</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'quad' );"><img src="img/quad.png">
+						<span>QUAD</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'parallel' );"><img src="img/parallel.png">
+						<span>PARALLEL</span></a></li>
+					</ul>
+					<ul id="second">
+						<li><a href="#" onclick="setTesselation( 'cut' )"><img src="img/cut.png">
+						<span>CUT</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'diamond' );"><img src="img/diamond.png">
+						<span>DIAMOND</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'shift' );"><img src="img/shift.png">
+						<span>SHIFT</span></a></li>
+					</ul>
+				</div>
+
+				<!-- subdivision -->
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				
+				<div class="title">
+					SUBDIVISION
+				</div>
+				<div id="left"></div>
+				<input type="range" name="range1" min="0" max="4" step="1" value="1"/>
+				<div id="right"></div>
+			</div>
+				
+			<!-- footer -->
+			<div id="footer">
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				
+				<div class="title">
+					BUILT BY MOE
+				</div>
+			</div>
+				
+				
+			
+		
+		</div>
+		
+		<script>
+			$(":range").rangeinput();
+		</script>
+		
+
+		<script>
+			       
+		var container, stats;
+
+		var scene, camera, controls, renderer;
+		
+		var geometry;
+		var mesh;
+
+		var width = window.innerWidth - 220; 
+		var height = window.innerHeight;
+
+		var subdiv = 1;
+		var tess = 'quad';
+
+		init();
+		animate();
+
+
+		function init() {
+			// container
+			
+			container = document.createElement( 'div' );
+			container.style.position = "absolute";
+			container.style.backgroundColor = "#f2f2f2";
+			container.style.top = "0";
+			container.style.left = "220px";
+			container.style.zIndex = "-1";
+			document.body.appendChild( container );
+		
+			// scene
+
+			scene = new THREE.Scene();
+			
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( width, height );
+			container.appendChild( renderer.domElement );
+			
+			//lights
+			
+			var ambient = new THREE.AmbientLight( 0x222222 );
+			scene.add( ambient );
+
+			var directionalLight = new THREE.DirectionalLight( 0x999999 );
+
+			scene.add( directionalLight );
+			
+			var pointLight = new THREE.PointLight( 0xffffff );
+			pointLight.position.x = 100;
+			pointLight.position.y = 50;
+			pointLight.position.z = 100;
+			
+			scene.add( pointLight );
+
+			//camera
+			
+			camera = new THREE.PerspectiveCamera( 35, width / height, 1, 20000 );
+			camera.position.x = -100;
+			camera.position.y = 100;
+			camera.position.z = 100;
+			
+			//trackball
+
+			controls = new THREE.TrackballControls( camera, renderer.domElement );
+
+			controls.rotateSpeed = 0.1;
+			controls.zoomSpeed = 1.8;
+			controls.panSpeed = 0.4;
+
+			controls.noZoom = false;
+			controls.noPan = true;
+
+			controls.staticMoving = false;
+			controls.dynamicDampingFactor = 1.0;
+
+			controls.minDistance = 100
+			controls.maxDistance = 5000
+
+			controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
+
+			// coordinates
+			
+			function v(x,y,z){ 
+				return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
+			};
+			
+			var lineGeo = new THREE.Geometry();
+			lineGeo.vertices.push(
+			  v(-500, 0, 0), v(500, 0, 0), v(50,0,0), v(45,5,0), v(50,0,0), v(45,-5,0),
+			  v(0, -500, 0), v(0, 500, 0), v(0,50,0), v(5,45,0), v(0,50,0), v(-5,45,0),
+			  v(0, 0, -500), v(0, 0, 500), v(0,0,50), v(5,0,45), v(0,0,50), v(-5,0,45)
+			);
+			
+			var lineMat = new THREE.LineBasicMaterial({
+			  color: 0x999999, lineWidth: 1});
+			
+			var line = new THREE.Line(lineGeo, lineMat);
+			line.type = THREE.Lines;
+			scene.add(line);
+			
+
+			// model
+
+			var loader = new THREE.JSONLoader(),
+				callbackSurface   = function( geometry ) { createScene( geometry ) };
+
+			loader.load( "js/surface.js", callbackSurface );
+			
+			
+			window.addEventListener( 'resize', onWindowResize, false );
+
+		}
+
+		function createScene( geometry ){
+			
+			//proxy geometry
+			
+			var mesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0xcccccc, shininess: 10, opacity: 0.2, side: THREE.DoubleSide,} ) );
+			mesh.scale.set( 1, 1, 1 );
+			
+			scene.add( mesh );
+			
+			
+			// line tesselation
+			
+			createTesselation( mesh );
+		}
+		
+		
+		function createSceneSub( geometry, x, y, z ) {
+			// TO DO
+			// rewrite subdivision to sort vertices in order
+			
+			var smooth = THREE.GeometryUtils.clone( geometry );
+			
+			smooth.mergeVertices();
+			
+			var modifier = new THREE.SubdivisionModifier( subdiv );
+
+			modifier.modify( smooth );
+			
+			var mesh = new THREE.Mesh( smooth, new THREE.MeshPhongMaterial( { color: 0xeeeeee, shininess: 10} ) );
+			mesh.position.set( x, y, z );
+			mesh.scale.set( 3, 3, 3 );
+			
+			scene.add( mesh );
+		}
+		
+		
+		function createTesselation( mesh ) {
+			var vert = mesh.geometry.vertices
+			
+			
+			
+			for ( i=0; i < vert.length; i++ ){
+			
+				//break out of edge case
+				if ( i%12 == 11 ){
+					continue;
+				}
+				else{
+					var pt1 = vert[i];
+					var pt2 = vert[i+1];
+					var pt3 = vert[i+2];
+					var pt4 = vert[i+12];
+					var pt5 = vert[i+13];
+					var pt6 = vert[i+14];
+					
+					if (pt4 != undefined && i%12 != 10 ){
+						
+						var lineGeo = new THREE.Geometry();
+						
+						if ( tess == 'tri'){
+							lineGeo.vertices.push( pt1, pt5, pt5, pt3, pt3, pt1 );
+						}
+						if ( tess == 'quad'){
+							lineGeo.vertices.push( pt1, pt4, pt4, pt5, pt5, pt2, pt2, pt1 );
+						}
+						if ( tess == 'parallel'){
+							lineGeo.vertices.push( pt1, pt4, pt1, pt5 );
+						}
+						if ( tess == 'cut'){
+							lineGeo.vertices.push( pt1, pt4, pt1, pt5, pt5, pt4 );
+						}
+						if ( tess == 'diamond'){
+							lineGeo.vertices.push( pt1, pt5, pt2, pt4 );
+						}
+						if ( tess == 'shift'){
+							lineGeo.vertices.push( pt1, pt4, pt4, pt5, pt2 );
+						}
+						
+						
+						var lineMat = new THREE.LineBasicMaterial({
+							color: 0x333333, linewidth: 2});
+							  
+						var line = new THREE.Line(lineGeo, lineMat);
+						line.type = THREE.Lines;
+						scene.add(line);
+						
+					}
+					
+					//six point tesselation wrap around
+					if ( i%12 == 10 ){
+						var lineGeo = new THREE.Geometry();
+						lineGeo.vertices.push(pt1, pt2);
+						
+						var lineMat = new THREE.LineBasicMaterial({
+							color: 0x222222, linewidth: 3});
+							  
+						var line = new THREE.Line(lineGeo, lineMat);
+						line.type = THREE.Lines;
+						scene.add(line);
+					}
+				}	      
+			}
+		}
+		
+		
+		function setTesselation( val ){
+				tess = val
+				
+				for (var i = scene.__objects.length; i >0; i--) {
+					if(scene.__objects[i] instanceof THREE.Line || scene.__objects[i] instanceof THREE.Mesh ) {
+					    scene.remove(scene.__objects[i]);
+					}
+				}
+				
+				createCoord();
+				
+				var loader = new THREE.JSONLoader(),
+					callbackSurface  = function( geometry ) { createScene( geometry,  0, 0, 0 ) };
+
+				loader.load( "js/surface.js", callbackSurface );
+		}
+		
+		
+		function createCoord(){
+			function v(x,y,z){ 
+				return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
+			};
+			
+			var lineGeo = new THREE.Geometry();
+			lineGeo.vertices.push(
+			  v(-500, 0, 0), v(500, 0, 0), v(50,0,0), v(45,5,0), v(50,0,0), v(45,-5,0),
+			  v(0, -500, 0), v(0, 500, 0), v(0,50,0), v(5,45,0), v(0,50,0), v(-5,45,0),
+			  v(0, 0, -500), v(0, 0, 500), v(0,0,50), v(5,0,45), v(0,0,50), v(-5,0,45)
+			);
+			
+			var lineMat = new THREE.LineBasicMaterial({
+			  color: 0x999999, lineWidth: 1});
+			
+			var line = new THREE.Line(lineGeo, lineMat);
+			line.type = THREE.Lines;
+			scene.add(line);
+		}
+		
+		
+		function onWindowResize() {
+			width = window.innerWidth - 220;
+			height = window.innerHeight;
+
+			renderer.setSize( width, height );
+
+			camera.aspect = width / height;
+			camera.updateProjectionMatrix();
+
+			controls.handleResize();
+
+		}
+
+
+
+		function animate() {
+			
+			requestAnimationFrame( animate );
+			render();
+
+		}
+
+		
+		function render() {
+
+			controls.update();
+			
+			camera.lookAt( scene.position );
+			
+			renderer.clear();
+			renderer.render( scene, camera );
+			
+			
+		}
+
+		</script>
+
+</body>
+
+</html>

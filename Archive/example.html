@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+  <head>
+    <title>EECS 774 Project 3</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    
+      
+    <script src="vendor/three.js/Three.js"></script>
+    <script src="vendor/three.js/Detector.js"></script>
+
+    <script src="vendor/threex/THREEx.screenshot.js"></script>
+    <script src="vendor/threex/THREEx.FullScreen.js"></script>
+    <script src="vendor/threex/THREEx.WindowResize.js"></script>
+
+    <!-- TODO: remove -->
+    <script src="vendor/threex.dragpancontrols.js"></script>
+
+    <script src="jqueryui/js/jquery-1.7.1.min.js"></script>
+    <script src="jqueryui/js/jquery-ui-1.8.18.custom.min.js"></script>
+
+    <script src="ajaxfileuploader/ajaxfileupload.js"></script>
+
+    <!-- TODO: bring this function here -->
+    <script src="ajaxfileuploader/load_save.js"></script>
+
+    <script src="jqueryFileTree/jqueryFileTree.js"></script>
+
+    <!-- NOTES_FOR_DR_MILLER: all my classes and functions are here: -->
+    <script src="NURBSForThree/NURBSUtils.js"></script>
+    <script src="NURBSForThree/NURBSCurve.js"></script>
+    <script src="NURBSForThree/NURBSCurveUtils.js"></script>
+    <script src="NURBSForThree/NURBSSurface.js"></script>
+    <script src="NURBSForThree/NURBSSurfaceUtils.js"></script>
+
+    <script src="js/utility.js"></script>
+
+
+
+    <script src="js/MyTrackballControls.js"></script>
+    <link href="css/main.css" rel="stylesheet"/>
+    <link href="jqueryFileTree/jqueryFileTree.css" rel="stylesheet"/>
+    <link href="jqueryui/css/dark-hive/jquery-ui-1.8.18.custom.css" rel="stylesheet"/>
+
+
+  </head>
+<body>
+  <!-- three.js container -->
+      <div id="container"></div>
+
+  <!-- info on screen display -->
+  <div id="info">
+    <div class="top">
+    </div>
+    <div class="bottom" id="inlineDoc" >
+    </div> 
+
+  </div> 
+
+  <div id="tabs" class="draggable">
+    <ul>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#load-save">Load / Save</a></li>
+    </ul>
+    <div id="tools">
+      <ul id="icons" class="ui-widget ui-helper-clearfix">
+      <!--
+  <li class="ui-state-default ui-corner-all"
+      title="Dynamic view control"
+      onclick='setCursorState("dynamic_view")'>
+      <span class="ui-icon ui-icon-arrowrefresh-1-e"></span>
+  </li>
+  <li class="ui-state-default ui-corner-all"
+      title="Move control point"
+      onclick='setCursorState("move_control_point")'>
+      <span class="ui-icon ui-icon-arrowthick-1-ne"></span>
+  </li>
+    -->
+
+  <li class="ui-state-default ui-corner-all" title="Zoom in"
+      onclick="zoom(-0.25)">
+    <span class="ui-icon ui-icon-zoomin"></span>
+  </li>
+  <li class="ui-state-default ui-corner-all" title="Zoom out"
+      onclick="zoom(0.25)">
+    <span class="ui-icon ui-icon-zoomout"></span>
+
+      </ul>
+
+  </li>
+
+  <ul id="icons" class="ui-widget ui-helper-clearfix">
+    <li class="ui-state-default ui-corner-all" title="Drag along x-y plane"
+        onclick='setDragAlong("xy")'>
+      <span>x-y</span>
+    </li>
+    <li class="ui-state-default ui-corner-all" title="Drag along x-z plane"
+        onclick='setDragAlong("xz")'>
+      <span>x-z</span>
+    </li>
+    <li class="ui-state-default ui-corner-all" title="Drag along y-z plane"
+        onclick='setDragAlong("yz")'>
+      <span>y-z</span>
+    </li>
+  </ul>
+
+  <!-- HIDE BOUND BOX, CONTROL POINTS AND SHAPE -->
+  <ul id="icons" class="ui-widget ui-helper-clearfix">
+    <li class="ui-state-default ui-corner-all" title=""
+        onclick='toggleBoundBox()'>
+      <span>toggle control polygon</span>
+    </li>
+    <li class="ui-state-default ui-corner-all" title=""
+        onclick='toggleShape()'>
+      <span>toggle surface/curve</span>
+    </li>
+    <li class="ui-state-default ui-corner-all" title=""
+        onclick='toggleControlPoints()'>
+      <span>toggle control points</span>
+    </li>
+  </ul>
+
+    </div>
+    <div id="load-save">
+
+
+      <div id="curves-folder"></div>
+
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var stats, scene, renderer, composer;
+    var camera, cameraControl;
+
+    if( !init() )  animate();
+
+    // init the scene
+    function init(){
+
+      if( Detector.webgl ){
+        renderer = new THREE.WebGLRenderer({
+          antialias    : true,  // to get smoother output
+          preserveDrawingBuffer  : true  // to allow screenshot
+        });
+        renderer.setClearColorHex( 0xBBBBBB, 1 );
+      }else{
+        renderer  = new THREE.CanvasRenderer();
+      }
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      document.getElementById('container').appendChild(renderer.domElement);
+
+
+      // create a scene
+      scene = new THREE.Scene();
+
+      // put a camera in the scene
+      camera  = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
+      camera.position.set(0, 0, 5);
+      scene.add(camera);
+
+      // projector for ray tracing
+      projector = new THREE.Projector();
+
+      // create a camera contol
+      cameraControls  = new THREE.MyTrackballControls( camera, document.getElementById('container') )
+
+      // transparently support window resize
+      THREEx.WindowResize.bind(renderer, camera);
+
+    }
+
+    // animation loop
+    function animate() {
+
+      // loop on request animation loop
+      // - it has to be at the begining of the function
+      // - see details at
+      // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+      requestAnimationFrame( animate );
+
+      // do the render
+      render();
+    }
+
+    // render the scene
+    function render() {
+      // variable which is increase by Math.PI every seconds - usefull for animation
+      var PIseconds  = Date.now() * Math.PI;
+
+      // update camera controls
+      cameraControls.update();
+
+      // TODO: not the best place to do this:
+      if (typeof currentShape != 'undefined' ) {
+
+        currentShape.updateScreenCoordinates();
+        if (currentShape instanceof NURBSCurveBuilder)
+        {
+          currentShape.curveGeometry.__dirtyVertices = true;
+          currentShape.boundBoxGeometry.__dirtyVertices = true;
+        }
+        // TODO: create NURBSSurfaceGeometry to be abale to set __dirtyVertices 
+        //       and upadate here
+        else if (currentShape instanceof NURBSSurfaceBuilder)
+        {
+          currentShape.surfMesh.geometry.__dirtyVertices = true;
+        }
+
+      }
+
+
+      // actually render the scene
+
+      renderer.render( scene, camera );
+    }
+  </script>
+</body>
+</html>

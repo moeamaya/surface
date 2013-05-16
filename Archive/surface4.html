@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>surface3</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	
+		<!-- javascript libraries-->
+		<script src="http://cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js"></script>
+		<script src="js/three.min.js"></script>
+		
+		<script src="js/NURBSCurve.js"></script>
+		<script src="js/NURBSUtils.js"></script>
+		
+		<script src="js/NURBSSurface.js"></script>
+		<script src="js/NURBSSurfaceUtils.js"></script>
+
+		
+		<!-- stylesheets -->
+		<link rel="stylesheet" type="text/css" href="css/main.css"/>
+		
+	</head>
+
+	<body>
+		<div id="menu">
+		
+			<div class="menumargin">
+			
+				<!-- logo -->
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div id="logo">
+					<img src="img/logo.png">
+				</div>
+				<div class="dotted"></div>
+			
+				<!-- upload -->
+				<a id="upload" href="#">
+					UPLOAD
+					<span>(OBJ)</span>
+				</a>
+				
+				<!-- tesselation -->
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				
+				<div class="title">
+					TESSELATION
+				</div>
+				
+				<div id="options">
+					<ul>
+						<li><a href="#" onclick="setTesselation( 'tri' )"><img src="img/tri.png">
+						<span>TRI</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'quad' );"><img src="img/quad.png">
+						<span>QUAD</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'parallel' );"><img src="img/parallel.png">
+						<span>PARALLEL</span></a></li>
+					</ul>
+					<ul id="second">
+						<li><a href="#" onclick="setTesselation( 'cut' )"><img src="img/cut.png">
+						<span>CUT</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'diamond' );"><img src="img/diamond.png">
+						<span>DIAMOND</span></a></li>
+						<li><a href="#" onclick="setTesselation( 'shift' );"><img src="img/shift.png">
+						<span>SHIFT</span></a></li>
+					</ul>
+				</div>
+
+				<!-- subdivision -->
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				
+				<div class="title">
+					U/V PANELING
+				</div>
+				<div id="left"></div>
+				<input type="range" id="range1" min="4" max="12" step="2" value="6"/>
+				<div id="right"></div>
+				<input type="range" id="range2" min="6" max="14" step="2" value="10"/>
+			</div>
+				
+			<!-- footer -->
+			<div id="footer">
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				<div class="dotted"></div>
+				
+				<div class="title">
+					BUILT BY MOE
+				</div>
+			</div>
+				
+				
+			
+		
+		</div>
+		
+		<script>
+			
+		</script>
+		
+
+		<script>
+		var uDiv = $("#range1").rangeinput().val();
+		var vDiv = $("#range2").rangeinput().val();
+		
+		$("#range1").change(function(event, value){
+			uDiv = value;
+			removeObjects();
+			createCoord();
+			drawNurbsCurve();
+			});
+		$("#range2").change(function(event, value){
+			vDiv = value;
+			removeObjects();
+			createCoord();
+			drawNurbsCurve();
+			});
+		       
+		var container, stats;
+
+		var scene, camera, controls, renderer;
+		
+		var geometry;
+		var mesh;
+
+		var width = window.innerWidth - 220; 
+		var height = window.innerHeight;
+
+		var subdiv = 1;
+		var tess = 'quad';
+
+		init();
+		animate();
+
+
+		function init() {
+			// container
+			
+			container = document.createElement( 'div' );
+			container.style.position = "absolute";
+			container.style.backgroundColor = "#f2f2f2";
+			container.style.top = "0";
+			container.style.left = "220px";
+			container.style.zIndex = "-1";
+			document.body.appendChild( container );
+		
+			// scene
+
+			scene = new THREE.Scene();
+			
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( width, height );
+			container.appendChild( renderer.domElement );
+			
+			//lights
+			
+			var ambient = new THREE.AmbientLight( 0x222222 );
+			scene.add( ambient );
+
+			var directionalLight = new THREE.DirectionalLight( 0x999999 );
+
+			scene.add( directionalLight );
+			
+			var pointLight = new THREE.PointLight( 0xffffff );
+			pointLight.position.x = 100;
+			pointLight.position.y = 50;
+			pointLight.position.z = 100;
+			
+			scene.add( pointLight );
+
+			//camera
+			
+			camera = new THREE.PerspectiveCamera( 35, width / height, 1, 20000 );
+			camera.position.x = 40;
+			camera.position.y = 30;
+			camera.position.z = 40;
+			
+			//trackball
+
+			controls = new THREE.TrackballControls( camera, renderer.domElement );
+
+			controls.rotateSpeed = 0.1;
+			controls.zoomSpeed = 1.8;
+			controls.panSpeed = 0.4;
+
+			controls.noZoom = false;
+			controls.noPan = true;
+
+			controls.staticMoving = false;
+			controls.dynamicDampingFactor = 1.0;
+
+			controls.minDistance = 20
+			controls.maxDistance = 1000
+
+			controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
+
+			// window resize
+			
+			window.addEventListener( 'resize', onWindowResize, false );
+			
+			// coordinates
+			
+			createCoord();
+			
+			// nurbs curve
+			
+			drawNurbsCurve();
+			
+		}
+		
+		
+		function drawNurbsCurve(){
+			var geometryPt = new THREE.SphereGeometry( .2, 4, 4 );
+			
+			points3 = [];
+			points3.push( new THREE.Vector3 ( -10, 0, 10 ) );
+			points3.push( new THREE.Vector3 ( -10, 0, -10 ) );
+			points3.push( new THREE.Vector3 ( 10, 0, -10 ) );
+			knots3 = [0,0,0,1,1,1];//5 points, order 3, multiplicity = order
+			order3 = 3;//order 3 = degree 2 = quadratic
+			curve3 = new THREE.NURBSCurve ( points3, knots3, order3 );
+			var bspline3 = THREE.NURBSCurveGeometry ( curve3, 20 );
+			var geometry3 = new THREE.Geometry();
+			
+			//draw the control points
+			var controlPoint=[];
+			for ( i = 0; i < points3.length ; i ++ ) {
+				controlPoint[i]  = new THREE.Mesh( geometryPt, new THREE.MeshLambertMaterial( { color: 0xff0000 } ) );
+				controlPoint[i].position = points3[i];
+				scene.add( controlPoint[i] );
+			}
+			
+			//draw the line
+			for ( i = 0; i < bspline3.length; ++ i ) {
+				geometry3.vertices.push( bspline3[i] );
+			}
+			var line3 = new THREE.Line( geometry3, new THREE.LineBasicMaterial( { color: 0xff8800, opacity: 1 } ) );
+			scene.add( line3 );
+			
+			
+			//make sweep surface
+			var sweepVector = new THREE.Vector3( 0, 10, 0 );
+			
+			var nurbs = new NURBSSurfaceBuilder( curve3 , 0, sweepVector, uDiv , vDiv );
+			var mesh = nurbs.surfMesh;
+			
+			createTesselation( mesh );
+		}
+		
+		
+		function createTesselation( mesh ) {
+			var vert = mesh.geometry.vertices
+			
+			if ( tess == "tri" || tess == "parallel" || tess == "shift"){
+				tessIncrement2();
+			}else {
+				tessIncrement1();
+			}
+			
+			
+			function tessIncrement1(){
+				for ( i=0; i < vert.length-2; i+=2 ){
+					pt1 = vert[i];
+					pt2 = vert[i+1];
+					pt3 = vert[i+2];
+					pt4 = vert[i+3];
+					
+					//break edge case
+					if (i%(vDiv*2  + 2) == (vDiv*2) && i != 0){
+						continue;
+					}
+					
+					//check if at end of vertex array
+					if ( pt2 !=  undefined ){
+	
+						var lineGeo = new THREE.Geometry();
+						
+						if ( tess == 'quad'){
+							lineGeo.vertices.push( pt1, pt2, pt2, pt4, pt4, pt3, pt3, pt1 );
+						}
+						if ( tess == 'cut'){
+							lineGeo.vertices.push( pt1, pt2, pt2, pt4, pt4, pt3, pt3, pt1, pt1, pt4 );
+						}
+						if ( tess == 'diamond'){
+							lineGeo.vertices.push( pt1, pt4, pt3, pt2 );
+						}
+						
+						var lineMat = new THREE.LineBasicMaterial({
+							color: 0x333333, linewidth: 1});
+							  
+						var line = new THREE.Line(lineGeo, lineMat);
+						line.type = THREE.Lines;
+						scene.add(line);
+					}
+				
+				}
+					
+			}
+			
+			
+			function tessIncrement2(){
+				for ( i=0; i < vert.length-2; i+=4 ){
+					pt1 = vert[i];
+					pt2 = vert[i+1];
+					pt3 = vert[i+2];
+					pt4 = vert[i+3];
+					pt5 = vert[i+4];
+					pt6 = vert[i+5];
+					
+					//break edge case
+					if (i%(vDiv*2  + 2) == (vDiv*2) && i != 0)
+					    {
+						continue;
+					}
+					
+					if ( i%(vDiv*2 + 2) == (vDiv*2 - 2)){
+						continue;
+					}
+					
+					//check if at end of vertex array
+					if ( pt2 !=  undefined ){
+	
+						var lineGeo = new THREE.Geometry();
+						
+						if ( tess == 'tri'){
+							lineGeo.vertices.push( pt1, pt4, pt4, pt5, pt5, pt1 );
+						}
+						if ( tess == 'parallel'){
+							lineGeo.vertices.push( pt1, pt4, pt4, pt6, pt6, pt3, pt3, pt1, pt4, pt2, pt3, pt5 );
+						}
+						if ( tess == 'shift'){
+							lineGeo.vertices.push( pt1, pt3, pt3, pt4, pt4, pt2, pt3, pt5, pt6, pt4);
+						}
+						
+						var lineMat = new THREE.LineBasicMaterial({
+							color: 0x333333, linewidth: 1});
+							  
+						var line = new THREE.Line(lineGeo, lineMat);
+						line.type = THREE.Lines;
+						scene.add(line);
+					}
+				
+				}
+					
+			}
+			
+			
+		}
+		
+		
+		function setTesselation( val ){
+			tess = val
+			
+			removeObjects();
+			createCoord();
+			drawNurbsCurve();
+		}
+		
+		
+		function createCoord(){
+			function v(x,y,z){ 
+				return new THREE.Vector3(x,y,z); 
+			};
+			
+			var lineGeo = new THREE.Geometry();
+			lineGeo.vertices.push(
+			  v(-500, 0, 0), v(500, 0, 0), v(50,0,0), v(45,5,0), v(50,0,0), v(45,-5,0),
+			  v(0, -500, 0), v(0, 500, 0), v(0,50,0), v(5,45,0), v(0,50,0), v(-5,45,0),
+			  v(0, 0, -500), v(0, 0, 500), v(0,0,50), v(5,0,45), v(0,0,50), v(-5,0,45)
+			);
+			
+			var lineMat = new THREE.LineBasicMaterial({
+			  color: 0x999999, lineWidth: 1});
+			
+			var line = new THREE.Line(lineGeo, lineMat);
+			line.type = THREE.Lines;
+			scene.add(line);
+		}
+		
+		
+		function removeObjects(){
+			for (var i = scene.__objects.length; i >0; i--) {
+					if(scene.__objects[i] instanceof THREE.Line || scene.__objects[i] instanceof THREE.Mesh ) {
+					    scene.remove(scene.__objects[i]);
+					}
+				}
+		}
+		
+		
+		function onWindowResize() {
+			width = window.innerWidth - 220;
+			height = window.innerHeight;
+
+			renderer.setSize( width, height );
+
+			camera.aspect = width / height;
+			camera.updateProjectionMatrix();
+
+			controls.handleResize();
+
+		}
+
+
+
+		function animate() {
+			
+			requestAnimationFrame( animate );
+			render();
+
+		}
+
+		
+		function render() {
+
+			controls.update();
+			
+			camera.lookAt( scene.position );
+			
+			renderer.render( scene, camera );
+			
+			
+		}
+
+		</script>
+
+</body>
+
+</html>
